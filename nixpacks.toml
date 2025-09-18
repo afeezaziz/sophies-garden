@@ -1,15 +1,11 @@
 [phases.setup]
-nixPkgs = ["python3", "gcc"]
+nixPkgs = ["python3", "gcc", "sqlite"]
 
 [phases.install]
 cmds = [
-    "pip install uv",
-    "uv sync"
-]
-
-[phases.start]
-cmds = [
-    "cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
+    "python -m venv /opt/venv",
+    ". /opt/venv/bin/activate && pip install --no-cache-dir --upgrade pip",
+    ". /opt/venv/bin/activate && pip install --no-cache-dir -r requirements.txt"
 ]
 
 [phases.build]
@@ -20,8 +16,10 @@ cmds = [
 ]
 
 [start]
-cmd = "cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
+cmd = "cd /app && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 hello:app"
 
 [variables]
 PORT = "8000"
 PYTHONUNBUFFERED = "1"
+# Google OAuth redirect URI for https://garden.angpao.my
+GOOGLE_REDIRECT_URI = "https://garden.angpao.my/callback"
