@@ -2,8 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+import pymysql
 
 load_dotenv()
+
+# Fix for MySQLdb compatibility
+pymysql.install_as_MySQLdb()
 
 app = Flask(__name__, template_folder='../templates')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
