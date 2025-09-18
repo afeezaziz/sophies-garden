@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Sophie's Garden{% endblock %}
+
+{% block content %}
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary mb-4">🌿 Admin Dashboard</h1>
+            <p class="text-lg text-base-content opacity-80">Manage your garden center</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ 'alert-success' if category == 'success' else 'alert-error' }} mb-6">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Contact Messages Section -->
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">📧 Contact Messages</h2>
+                    <p class="text-sm text-base-content opacity-80 mb-4">
+                        {{ messages|length }} total messages
+                    </p>
+
+                    {% if messages %}
+                        <div class="space-y-4">
+                            {% for message in messages %}
+                                <div class="bg-base-300 rounded-lg p-4 {{ 'opacity-60' if message.is_read else '' }}">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 class="font-semibold">{{ message.name }}</h3>
+                                            <p class="text-sm opacity-80">{{ message.email }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-xs opacity-60">{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                            {% if not message.is_read %}
+                                                <span class="badge badge-primary badge-xs">New</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <p class="font-medium text-sm mb-1">{{ message.subject }}</p>
+                                    <p class="text-sm opacity-80 mb-3">{{ message.message[:100] }}{% if message.message|length > 100 %}...{% endif %}</p>
+                                    <div class="flex gap-2">
+                                        {% if not message.is_read %}
+                                            <a href="{{ url_for('mark_read', message_id=message.id) }}" class="btn btn-xs btn-primary">Mark Read</a>
+                                        {% endif %}
+                                        <a href="{{ url_for('delete_message', message_id=message.id) }}" class="btn btn-xs btn-error" onclick="return confirm('Are you sure?')">Delete</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center opacity-60 py-8">No messages yet</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Plants Management Section -->
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">🌱 Plant Inventory</h2>
+                    <p class="text-sm text-base-content opacity-80 mb-4">
+                        {{ plants|length }} total plants
+                    </p>
+
+                    {% if plants %}
+                        <div class="overflow-x-auto">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for plant in plants %}
+                                        <tr>
+                                            <td class="font-medium">{{ plant.name }}</td>
+                                            <td>{{ plant.category }}</td>
+                                            <td>${{ plant.price }}</td>
+                                            <td>
+                                                {% if plant.in_stock %}
+                                                    <span class="badge badge-success">In Stock</span>
+                                                {% else %}
+                                                    <span class="badge badge-error">Out of Stock</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center opacity-60 py-8">No plants in inventory</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('index') }}" class="btn btn-outline btn-primary">← Back to Site</a>
+        </div>
+    </div>
+{% endblock %}

@@ -16,6 +16,7 @@
         <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1 space-x-1">
                 <li><a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm">Home</a></li>
+                <li><a href="{{ url_for('plants') }}" class="btn btn-ghost btn-sm">Plants</a></li>
                 <li><a href="{{ url_for('about') }}" class="btn btn-ghost btn-sm">About</a></li>
                 <li><a href="{{ url_for('contact') }}" class="btn btn-ghost btn-sm">Contact</a></li>
             </ul>
@@ -29,6 +30,7 @@
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
                     <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('plants') }}">Plants</a></li>
                     <li><a href="{{ url_for('about') }}">About</a></li>
                     <li><a href="{{ url_for('contact') }}">Contact</a></li>
                 </ul>

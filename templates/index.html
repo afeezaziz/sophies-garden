@@ -20,30 +20,37 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div class="card bg-base-200 shadow-sm">
-                <div class="card-body">
-                    <div class="text-4xl mb-4">🌺</div>
-                    <h3 class="card-title text-primary">Exotic Flowers</h3>
-                    <p class="text-base-content opacity-80">Discover rare and beautiful flowers from around the world.</p>
+        <!-- Featured Plants -->
+        {% if plants %}
+            <div class="mt-12">
+                <h2 class="text-3xl font-bold text-primary mb-6">🌱 Featured Plants</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for plant in plants %}
+                        <div class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow">
+                            <figure>
+                                <img src="{{ plant.image_url }}" alt="{{ plant.name }}" class="w-full h-48 object-cover">
+                            </figure>
+                            <div class="card-body">
+                                <h3 class="card-title text-primary">{{ plant.name }}</h3>
+                                {% if plant.scientific_name %}
+                                    <p class="text-sm italic opacity-70">{{ plant.scientific_name }}</p>
+                                {% endif %}
+                                <p class="text-sm opacity-80 line-clamp-2">{{ plant.description }}</p>
+                                <div class="flex justify-between items-center mt-4">
+                                    <span class="text-lg font-bold text-primary">${{ plant.price }}</span>
+                                    <span class="badge badge-success">In Stock</span>
+                                </div>
+                                <div class="card-actions justify-end mt-4">
+                                    <a href="{{ url_for('plant_detail', plant_id=plant.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-8">
+                    <a href="{{ url_for('plants') }}" class="btn btn-outline btn-primary">View All Plants →</a>
                 </div>
             </div>
-
-            <div class="card bg-base-200 shadow-sm">
-                <div class="card-body">
-                    <div class="text-4xl mb-4">🌿</div>
-                    <h3 class="card-title text-primary">Organic Plants</h3>
-                    <p class="text-base-content opacity-80">Fresh, healthy plants grown with sustainable methods.</p>
-                </div>
-            </div>
-
-            <div class="card bg-base-200 shadow-sm">
-                <div class="card-body">
-                    <div class="text-4xl mb-4">🌱</div>
-                    <h3 class="card-title text-primary">Gardening Tips</h3>
-                    <p class="text-base-content opacity-80">Expert advice to help your garden flourish year-round.</p>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 {% endblock %}

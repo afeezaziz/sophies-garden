@@ -4,6 +4,16 @@
 
 {% block content %}
     <div class="max-w-6xl mx-auto">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ 'alert-success' if category == 'success' else 'alert-error' }} mb-6">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-primary mb-4">🌻 Contact Sophie's Garden</h1>
             <p class="text-lg text-base-content opacity-80">
@@ -15,7 +25,7 @@
             <div class="card bg-base-200 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title text-primary mb-4">📧 Get in Touch</h2>
-                    <form class="space-y-4">
+                    <form method="POST" class="space-y-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">Name</span>

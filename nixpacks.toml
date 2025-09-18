@@ -1,11 +1,17 @@
 [phases.setup]
-nixPkgs = ["python3", "gcc", "sqlite"]
+nixPkgs = ["python3", "gcc", "postgresql"]
 
 [phases.install]
 cmds = [
     "python -m venv /opt/venv",
     ". /opt/venv/bin/activate && pip install --no-cache-dir --upgrade pip",
     ". /opt/venv/bin/activate && pip install --no-cache-dir -r requirements.txt"
+]
+
+[phases.start]
+cmds = [
+    "python migrate.py",
+    "cd /app && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
 ]
 
 [phases.build]
