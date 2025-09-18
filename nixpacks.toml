@@ -21,4 +21,4 @@ cmd = "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --time
 [variables]
 PORT = "8000"
 PYTHONUNBUFFERED = "1"
-DATABASE_URL = "postgresql://postgres:07EJ4STi3OzQY4GidARkx7AFQvwjr1ioQnexmzUM0ccncCinSuwSvOyvzIltsBye@104.248.150.75:30011/postgres"
+DATABASE_URL = "mysql+pymysql://mariadb:1dNUKkSA6l13reCGE0mxN0xl1Tz6wrGvivIVH4zUd6uUFtC7Ffs42i2kwqdoTUPA@104.248.150.75:33001/default"
