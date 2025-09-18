@@ -12,8 +12,7 @@ cmds = [
 cmds = [
     "mkdir -p /app/templates /app/static",
     "cp -r templates/* /app/templates/ 2>/dev/null || true",
-    "cp -r static/* /app/static/ 2>/dev/null || true",
-    ". /opt/venv/bin/activate && ALEMBIC_CONFIG=migrations/alembic.ini alembic -c migrations/alembic.ini upgrade head"
+    "cp -r static/* /app/static/ 2>/dev/null || true"
 ]
 
 [start]
