@@ -21,5 +21,3 @@ cmd = "cd /app && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 hello:
 [variables]
 PORT = "8000"
 PYTHONUNBUFFERED = "1"
-# Google OAuth redirect URI for https://garden.angpao.my
-GOOGLE_REDIRECT_URI = "https://garden.angpao.my/callback"
