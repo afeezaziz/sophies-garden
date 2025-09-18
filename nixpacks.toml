@@ -1,16 +1,15 @@
 [phases.setup]
-nixPkgs = ["python3", "gcc", "curl"]
+nixPkgs = ["python3", "gcc"]
 
 [phases.install]
 cmds = [
-    "curl -LsSf https://astral.sh/uv/install.sh | sh",
-    "source $HOME/.cargo/env",
+    "pip install uv",
     "uv sync"
 ]
 
 [phases.start]
 cmds = [
-    "source $HOME/.cargo/env && cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
+    "cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
 ]
 
 [phases.build]
@@ -21,7 +20,7 @@ cmds = [
 ]
 
 [start]
-cmd = "source $HOME/.cargo/env && cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
+cmd = "cd /app && uv run gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 run:app"
 
 [variables]
 PORT = "8000"
