@@ -12,7 +12,8 @@ cmds = [
 cmds = [
     "mkdir -p /app/templates /app/static",
     "cp -r templates/* /app/templates/ 2>/dev/null || true",
-    "cp -r static/* /app/static/ 2>/dev/null || true"
+    "cp -r static/* /app/static/ 2>/dev/null || true",
+    ". /opt/venv/bin/activate && ALEMBIC_CONFIG=migrations/alembic.ini alembic -c migrations/alembic.ini upgrade head"
 ]
 
 [start]
@@ -21,3 +22,4 @@ cmd = "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --time
 [variables]
 PORT = "8000"
 PYTHONUNBUFFERED = "1"
+DATABASE_URL = "postgresql://postgres:07EJ4STi3OzQY4GidARkx7AFQvwjr1ioQnexmzUM0ccncCinSuwSvOyvzIltsBye@104.248.150.75:30011/postgres"
