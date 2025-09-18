@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Services - Sophie's Garden{% endblock %}
+
+{% block content %}
+    <div class="space-y-8">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-primary mb-4">🌿 Our Services</h1>
+            <p class="text-lg text-base-content opacity-80 max-w-2xl mx-auto">
+                Professional gardening and landscaping services to transform your outdoor space into a paradise.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">🌺</div>
+                    <h3 class="card-title text-primary">Garden Design</h3>
+                    <p class="text-base-content opacity-80 mb-4">Custom garden designs tailored to your space and preferences.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>Layout planning</li>
+                        <li>Plant selection</li>
+                        <li>Color schemes</li>
+                        <li>Seasonal planning</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">🌱</div>
+                    <h3 class="card-title text-primary">Plant Installation</h3>
+                    <p class="text-base-content opacity-80 mb-4">Professional planting services for healthy, thriving gardens.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>Soil preparation</li>
+                        <li>Plant sourcing</li>
+                        <li>Proper planting techniques</li>
+                        <li>Initial care</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">✂️</div>
+                    <h3 class="card-title text-primary">Garden Maintenance</h3>
+                    <p class="text-base-content opacity-80 mb-4">Regular care to keep your garden beautiful year-round.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>Weekly maintenance</li>
+                        <li>Pruning & trimming</li>
+                        <li>Fertilizing</li>
+                        <li>Pest control</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">🏗️</div>
+                    <h3 class="card-title text-primary">Landscape Construction</h3>
+                    <p class="text-base-content opacity-80 mb-4">Hardscaping and structural elements for your garden.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>Pathways & walkways</li>
+                        <li>Retaining walls</li>
+                        <li>Water features</li>
+                        <li>Outdoor structures</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">💧</div>
+                    <h3 class="card-title text-primary">Irrigation Systems</h3>
+                    <p class="text-base-content opacity-80 mb-4">Efficient watering solutions for healthy plants.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>Drip irrigation</li>
+                        <li>Sprinkler systems</li>
+                        <li>Smart controllers</li>
+                        <li>Rain water harvesting</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-5xl mb-4">🎓</div>
+                    <h3 class="card-title text-primary">Garden Coaching</h3>
+                    <p class="text-base-content opacity-80 mb-4">Learn to care for your own garden with expert guidance.</p>
+                    <ul class="list-disc list-inside text-sm text-base-content opacity-70">
+                        <li>One-on-one sessions</li>
+                        <li>Seasonal workshops</li>
+                        <li>Plant care education</li>
+                        <li>Problem solving</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <h2 class="text-2xl font-bold text-primary mb-4">Ready to Transform Your Garden?</h2>
+            <p class="text-base-content opacity-80 mb-6">Contact us today for a free consultation and quote.</p>
+            <a href="{{ url_for('contact') }}" class="btn btn-primary">Get Started</a>
+        </div>
+    </div>
+{% endblock %}

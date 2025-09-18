@@ -105,5 +105,17 @@ def plant_detail(plant_id):
     plant = Plant.query.get_or_404(plant_id)
     return render_template('plant_detail.html', plant=plant)
 
+@app.route('/services')
+def services():
+    return render_template('services.html')
+
+@app.route('/gallery')
+def gallery():
+    return render_template('gallery.html')
+
+@app.route('/blog')
+def blog():
+    return render_template('blog.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
