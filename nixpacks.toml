@@ -17,11 +17,11 @@ cmds = [
 
 [phases.start]
 cmds = [
-    "cd /app && . /opt/venv/bin/activate && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
+    "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
 ]
 
 [start]
-cmd = "cd /app && . /opt/venv/bin/activate && gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
+cmd = "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
 
 [variables]
 PORT = "8000"
