@@ -1,29 +1,125 @@
 {% extends "base.html" %}
 
-{% block title %}Contact - My Flask App{% endblock %}
+{% block title %}Contact - Sophie's Garden{% endblock %}
 
 {% block content %}
-    <section class="contact">
-        <h2>Contact Us</h2>
-        <p>Get in touch with us through the form below.</p>
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary mb-4">🌻 Contact Sophie's Garden</h1>
+            <p class="text-lg text-base-content opacity-80">
+                We'd love to hear from you! Reach out for questions, plant care advice, or to visit our garden.
+            </p>
+        </div>
 
-        <form class="contact-form">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">📧 Get in Touch</h2>
+                    <form class="space-y-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Name</span>
+                            </label>
+                            <input type="text" placeholder="Your name" class="input input-bordered" required />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Email</span>
+                            </label>
+                            <input type="email" placeholder="your@email.com" class="input input-bordered" required />
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Subject</span>
+                            </label>
+                            <select class="select select-bordered">
+                                <option disabled selected>Select a topic</option>
+                                <option>General Inquiry</option>
+                                <option>Plant Care Advice</option>
+                                <option>Workshop Registration</option>
+                                <option>Wholesale Orders</option>
+                                <option>Visit Our Garden</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Message</span>
+                            </label>
+                            <textarea class="textarea textarea-bordered h-24" placeholder="Tell us about your gardening needs..." required></textarea>
+                        </div>
+
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
+            <div class="space-y-6">
+                <div class="card bg-base-200 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-primary mb-4">📍 Visit Our Garden</h2>
+                        <div class="space-y-3 text-base-content opacity-80">
+                            <div class="flex items-start gap-3">
+                                <span class="text-primary mt-1">🏠</span>
+                                <div>
+                                    <p class="font-semibold">Address</p>
+                                    <p>123 Garden Lane<br />
+                                    Bloomington, FL 12345</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-primary mt-1">🕒</span>
+                                <div>
+                                    <p class="font-semibold">Hours</p>
+                                    <p>Tuesday - Sunday: 9:00 AM - 6:00 PM<br />
+                                    Monday: Closed</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-primary mt-1">📞</span>
+                                <div>
+                                    <p class="font-semibold">Phone</p>
+                                    <p>(555) 123-4567</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-primary mt-1">✉️</span>
+                                <div>
+                                    <p class="font-semibold">Email</p>
+                                    <p>hello@sophiesgarden.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
+                <div class="card bg-base-200 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-primary mb-4">🌱 Garden Services</h2>
+                        <ul class="space-y-2 text-base-content opacity-80">
+                            <li class="flex items-center gap-2">
+                                <span class="text-primary">✓</span> Free gardening consultations
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-primary">✓</span> Plant delivery service
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-primary">✓</span> Custom garden design
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-primary">✓</span> Weekend workshops
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="text-primary">✓</span> Plant care support
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-
-            <button type="submit" class="btn">Send Message</button>
-        </form>
-    </section>
+        </div>
+    </div>
 {% endblock %}

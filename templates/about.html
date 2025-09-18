@@ -1,28 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}About - My Flask App{% endblock %}
+{% block title %}About - Sophie's Garden{% endblock %}
 
 {% block content %}
-    <section class="about">
-        <h2>About This App</h2>
-        <p>This is a simple Flask application that demonstrates the use of templates, static files, and basic routing.</p>
-
-        <div class="about-content">
-            <h3>Technologies Used</h3>
-            <ul>
-                <li>Flask - Web framework</li>
-                <li>Jinja2 - Template engine</li>
-                <li>HTML5 & CSS3 - Frontend</li>
-                <li>Python - Backend</li>
-            </ul>
-
-            <h3>Features</h3>
-            <ul>
-                <li>Template inheritance</li>
-                <li>Static file serving</li>
-                <li>Basic routing</li>
-                <li>Clean URL structure</li>
-            </ul>
+    <div class="max-w-4xl mx-auto space-y-8">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-primary mb-4">🌻 About Sophie's Garden</h1>
+            <p class="text-lg text-base-content opacity-80">
+                Founded with a passion for nature and beauty, Sophie's Garden is your premier destination for
+                exceptional plants and gardening expertise.
+            </p>
         </div>
-    </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">🌺 Our Story</h2>
+                    <p class="text-base-content opacity-80 mb-4">
+                        Sophie's Garden began as a small backyard project and has blossomed into a beloved community
+                        resource for gardening enthusiasts. Our mission is to bring the beauty and tranquility of
+                        nature into every home.
+                    </p>
+                    <p class="text-base-content opacity-80">
+                        We carefully select each plant for its beauty, health, and ability to thrive in various
+                        environments, ensuring that our customers receive only the best nature has to offer.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">🌿 What We Offer</h2>
+                    <ul class="space-y-2 text-base-content opacity-80">
+                        <li class="flex items-center gap-2">
+                            <span class="text-primary">🌸</span> Rare and exotic flowers
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-primary">🌱</span> Organic vegetable plants
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-primary">🌻</span> Native wildflowers
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-primary">🌿</span> Herb and medicinal plants
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-primary">🌰</span> Gardening workshops
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-200 shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="card-title text-primary mb-4">🌱 Our Commitment</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">♻️</div>
+                        <h3 class="font-semibold text-primary">Sustainable</h3>
+                        <p class="text-sm text-base-content opacity-80">Eco-friendly growing practices</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">❤️</div>
+                        <h3 class="font-semibold text-primary">Quality</h3>
+                        <p class="text-sm text-base-content opacity-80">Premium plants and service</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🎓</div>
+                        <h3 class="font-semibold text-primary">Education</h3>
+                        <p class="text-sm text-base-content opacity-80">Expert gardening guidance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

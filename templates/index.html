@@ -1,29 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}Home - My Flask App{% endblock %}
+{% block title %}Home - Sophie's Garden{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <h2>Welcome to My Flask App</h2>
-        <p>This is a simple Flask application with templates.</p>
-        <a href="{{ url_for('about') }}" class="btn">Learn More</a>
-    </section>
-
-    <section class="features">
-        <h3>Features</h3>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h4>Fast</h4>
-                <p>Built with Flask for performance</p>
-            </div>
-            <div class="feature-card">
-                <h4>Simple</h4>
-                <p>Clean and easy to understand code</p>
-            </div>
-            <div class="feature-card">
-                <h4>Extensible</h4>
-                <p>Easy to add new features</p>
+    <div class="text-center space-y-6">
+        <div class="hero">
+            <div class="hero-content text-center">
+                <div class="max-w-2xl">
+                    <h1 class="text-5xl font-bold text-primary mb-4">🌸 Welcome to Sophie's Garden</h1>
+                    <p class="text-lg text-base-content opacity-80 mb-8">
+                        A beautiful sanctuary where nature meets tranquility. Discover our collection of stunning flowers,
+                        plants, and gardening tips to create your own paradise.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{{ url_for('about') }}" class="btn btn-primary">Learn More</a>
+                        <a href="{{ url_for('contact') }}" class="btn btn-outline btn-primary">Get in Touch</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-4xl mb-4">🌺</div>
+                    <h3 class="card-title text-primary">Exotic Flowers</h3>
+                    <p class="text-base-content opacity-80">Discover rare and beautiful flowers from around the world.</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-4xl mb-4">🌿</div>
+                    <h3 class="card-title text-primary">Organic Plants</h3>
+                    <p class="text-base-content opacity-80">Fresh, healthy plants grown with sustainable methods.</p>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                    <div class="text-4xl mb-4">🌱</div>
+                    <h3 class="card-title text-primary">Gardening Tips</h3>
+                    <p class="text-base-content opacity-80">Expert advice to help your garden flourish year-round.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

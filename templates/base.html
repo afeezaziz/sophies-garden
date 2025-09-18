@@ -1,29 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="garden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Flask App{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>{% block title %}Sophie's Garden{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 </head>
-<body>
-    <header>
-        <nav>
-            <h1><a href="{{ url_for('index') }}">My Flask App</a></h1>
-            <ul>
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}">About</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+<body class="min-h-screen flex flex-col bg-base-100">
+    <header class="navbar bg-base-200 shadow-sm px-4 py-2">
+        <div class="navbar-start">
+            <a href="{{ url_for('index') }}" class="btn btn-ghost text-xl font-bold text-primary">🌸 Sophie's Garden</a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1 space-x-1">
+                <li><a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm">Home</a></li>
+                <li><a href="{{ url_for('about') }}" class="btn btn-ghost btn-sm">About</a></li>
+                <li><a href="{{ url_for('contact') }}" class="btn btn-ghost btn-sm">Contact</a></li>
             </ul>
-        </nav>
+        </div>
+        <div class="navbar-end">
+            <div class="dropdown dropdown-end lg:hidden">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </div>
+        </div>
     </header>
 
-    <main>
+    <main class="flex-grow container mx-auto px-4 py-6">
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <p>&copy; 2024 My Flask App. All rights reserved.</p>
+    <footer class="bg-base-200 py-3 px-4">
+        <div class="container mx-auto text-center">
+            <p class="text-sm text-base-content opacity-75">&copy; 2024 Sophie's Garden. All rights reserved.</p>
+        </div>
     </footer>
 </body>
 </html>
