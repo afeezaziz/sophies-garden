@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home - My Flask App{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <h2>Welcome to My Flask App</h2>
+        <p>This is a simple Flask application with templates.</p>
+        <a href="{{ url_for('about') }}" class="btn">Learn More</a>
+    </section>
+
+    <section class="features">
+        <h3>Features</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Fast</h4>
+                <p>Built with Flask for performance</p>
+            </div>
+            <div class="feature-card">
+                <h4>Simple</h4>
+                <p>Clean and easy to understand code</p>
+            </div>
+            <div class="feature-card">
+                <h4>Extensible</h4>
+                <p>Easy to add new features</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}
