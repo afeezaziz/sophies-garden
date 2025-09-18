@@ -15,10 +15,6 @@ cmds = [
     "cp -r static/* /app/static/ 2>/dev/null || true"
 ]
 
-[phases.start]
-cmds = [
-    "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
-]
 
 [start]
 cmd = "cd /app && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 app:app"
