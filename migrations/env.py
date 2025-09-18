@@ -31,7 +31,7 @@ target_metadata = db.metadata
 
 
 def get_url():
-    return os.environ.get('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/sophies_garden')
+    return os.environ.get('DATABASE_URL', 'sqlite:///sophies_garden.db')
 
 
 def run_migrations_offline() -> None:

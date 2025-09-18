@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('email', sa.String(length=120), nullable=False),
         sa.Column('subject', sa.String(length=200), nullable=False),
         sa.Column('message', sa.Text(), nullable=False),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('is_read', sa.Boolean(), server_default='false', nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
@@ -41,7 +41,7 @@ def upgrade() -> None:
         sa.Column('category', sa.String(length=50), nullable=False),
         sa.Column('image_url', sa.String(length=300), nullable=True),
         sa.Column('in_stock', sa.Boolean(), server_default='true', nullable=True),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+        sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
 
