@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sophie's Garden{% endblock %}
+
+{% block content %}
+  <div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <h1 class="font-display text-3xl md:text-4xl font-bold gradient-text">🌿 Dashboard</h1>
+        <p class="text-base-content opacity-80">Overview, messages, and plant inventory</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="card garden-glass">
+        <div class="card-body">
+          <div class="text-sm opacity-70">Total Plants</div>
+          <div class="text-3xl font-bold text-primary">{{ total_plants }}</div>
+        </div>
+      </div>
+      <div class="card garden-glass">
+        <div class="card-body">
+          <div class="text-sm opacity-70">In Stock</div>
+          <div class="text-3xl font-bold text-primary">{{ in_stock_count }}</div>
+        </div>
+      </div>
+      <div class="card garden-glass">
+        <div class="card-body">
+          <div class="text-sm opacity-70">Categories</div>
+          <div class="text-3xl font-bold text-primary">{{ categories_count }}</div>
+        </div>
+      </div>
+      <div class="card garden-glass">
+        <div class="card-body">
+          <div class="text-sm opacity-70">Messages</div>
+          <div class="flex items-baseline gap-2">
+            <div class="text-3xl font-bold text-primary">{{ total_messages }}</div>
+            {% if unread_count %}
+              <span class="badge badge-primary">{{ unread_count }} new</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="card garden-glass">
+      <div class="card-body">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <h2 class="card-title text-primary">📧 Messages</h2>
+          <form method="GET" action="{{ url_for('dashboard') }}" class="join">
+            <input type="text" name="q_msg" value="{{ q_msg or '' }}" placeholder="Search messages..." class="input input-bordered join-item w-64" />
+            <button class="btn btn-primary join-item">Search</button>
+            {% if q_msg %}
+              <a href="{{ url_for('dashboard') }}" class="btn join-item">Clear</a>
+            {% endif %}
+          </form>
+        </div>
+        {% if messages %}
+          <div class="space-y-3 mt-3">
+            {% for message in messages %}
+              <div class="garden-glass rounded-lg p-4 {{ 'opacity-60' if message.is_read else '' }}">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-semibold">{{ message.name }}</h3>
+                      {% if not message.is_read %}
+                        <span class="badge badge-primary badge-sm">New</span>
+                      {% endif %}
+                    </div>
+                    <p class="text-sm opacity-80">{{ message.email }}</p>
+                    <p class="font-medium text-sm mt-1">{{ message.subject }}</p>
+                    <p class="text-sm opacity-80 mt-1">{{ message.message[:160] }}{% if message.message|length > 160 %}...{% endif %}</p>
+                  </div>
+                  <div class="text-right min-w-[180px]">
+                    <div class="text-xs opacity-60">{{ message.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    <div class="mt-2 flex justify-end gap-2">
+                      {% if not message.is_read %}
+                        <a href="{{ url_for('dashboard_mark_read', message_id=message.id) }}" class="btn btn-xs btn-primary">Mark Read</a>
+                      {% endif %}
+                      <a href="{{ url_for('dashboard_delete_message', message_id=message.id) }}" class="btn btn-xs btn-error" onclick="return confirm('Delete this message?')">Delete</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center opacity-60 py-8">No messages found</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Plants -->
+    <div class="card garden-glass">
+      <div class="card-body">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <h2 class="card-title text-primary">🌱 Plants</h2>
+          <form method="GET" action="{{ url_for('dashboard') }}" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+            <div class="join">
+              <input type="text" name="q_plant" value="{{ q_plant or '' }}" placeholder="Search plants..." class="input input-bordered join-item w-64" />
+              <button class="btn btn-primary join-item">Search</button>
+              {% if q_plant or only_in_stock %}
+                <a href="{{ url_for('dashboard') }}" class="btn join-item">Clear</a>
+              {% endif %}
+            </div>
+            <label class="label cursor-pointer gap-2">
+              <input type="checkbox" name="in_stock" value="1" class="checkbox checkbox-primary" {% if only_in_stock %}checked{% endif %} />
+              <span class="label-text">In Stock only</span>
+            </label>
+          </form>
+        </div>
+        {% if plants %}
+          <div class="overflow-x-auto mt-4">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="hidden md:table-cell">Scientific</th>
+                  <th>Category</th>
+                  <th class="text-right">Price</th>
+                  <th class="text-center">Stock</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for p in plants %}
+                  <tr>
+                    <td>
+                      <div class="font-semibold">{{ p.name }}</div>
+                      <div class="md:hidden text-xs opacity-70">{{ p.scientific_name or '' }}</div>
+                    </td>
+                    <td class="hidden md:table-cell">{{ p.scientific_name or '' }}</td>
+                    <td>{{ p.category }}</td>
+                    <td class="text-right">${{ '%.2f'|format(p.price) }}</td>
+                    <td class="text-center">
+                      {% if p.in_stock %}
+                        <span class="badge badge-success">In</span>
+                      {% else %}
+                        <span class="badge badge-error">Out</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center opacity-60 py-8">No plants found</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

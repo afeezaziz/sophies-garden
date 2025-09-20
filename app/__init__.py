@@ -11,7 +11,12 @@ load_dotenv()
 # Fix for MySQLdb compatibility
 pymysql.install_as_MySQLdb()
 
-app = Flask(__name__, template_folder='../templates')
+app = Flask(
+    __name__,
+    template_folder='../templates',
+    static_folder='../static',
+    static_url_path='/static',
+)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///sophies_garden.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -65,8 +70,14 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    featured_plants = Plant.query.filter_by(in_stock=True).limit(6).all()
-    return render_template('index.html', plants=featured_plants)
+    featured_plants = Plant.query.filter_by(in_stock=True).order_by(Plant.created_at.desc()).limit(6).all()
+    recent_posts = []
+    try:
+        recent_posts = BlogPost.query.filter_by(is_published=True).order_by(BlogPost.published_at.desc()).limit(3).all()
+    except Exception:
+        # If blog table isn't present yet, fail gracefully
+        recent_posts = []
+    return render_template('index.html', plants=featured_plants, posts=recent_posts)
 
 @app.route('/about')
 def about():
@@ -96,27 +107,80 @@ def contact():
 
     return render_template('contact.html')
 
-@app.route('/admin')
-def admin():
-    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
-    plants = Plant.query.all()
-    return render_template('admin.html', messages=messages, plants=plants)
+@app.route('/dashboard')
+def dashboard():
+    # Stats
+    total_plants = Plant.query.count()
+    in_stock_count = Plant.query.filter_by(in_stock=True).count()
+    categories_count = db.session.query(Plant.category).distinct().count()
+    total_messages = ContactMessage.query.count()
+    unread_count = ContactMessage.query.filter_by(is_read=False).count()
 
-@app.route('/admin/mark-read/<int:message_id>')
-def mark_read(message_id):
+    # Message search/filter
+    q_msg = (request.args.get('q_msg') or '').strip()
+    msg_query = ContactMessage.query
+    if q_msg:
+        like = f"%{q_msg}%"
+        msg_query = msg_query.filter(
+            or_(
+                ContactMessage.name.ilike(like),
+                ContactMessage.email.ilike(like),
+                ContactMessage.subject.ilike(like),
+                ContactMessage.message.ilike(like),
+            )
+        )
+    messages = msg_query.order_by(ContactMessage.created_at.desc()).limit(50).all()
+
+    # Plant search/filter
+    q_plant = (request.args.get('q_plant') or '').strip()
+    only_in_stock = request.args.get('in_stock') == '1'
+    plant_query = Plant.query
+    if q_plant:
+        like = f"%{q_plant}%"
+        plant_query = plant_query.filter(
+            or_(
+                Plant.name.ilike(like),
+                Plant.scientific_name.ilike(like),
+                Plant.category.ilike(like),
+            )
+        )
+    if only_in_stock:
+        plant_query = plant_query.filter_by(in_stock=True)
+    plants = plant_query.order_by(Plant.created_at.desc()).limit(100).all()
+
+    return render_template(
+        'dashboard.html',
+        messages=messages,
+        plants=plants,
+        total_plants=total_plants,
+        in_stock_count=in_stock_count,
+        categories_count=categories_count,
+        total_messages=total_messages,
+        unread_count=unread_count,
+        q_msg=q_msg,
+        q_plant=q_plant,
+        only_in_stock=only_in_stock,
+    )
+
+@app.route('/admin')
+def admin_legacy():
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard/mark-read/<int:message_id>')
+def dashboard_mark_read(message_id):
     message = ContactMessage.query.get_or_404(message_id)
     message.is_read = True
     db.session.commit()
     flash('Message marked as read.', 'success')
-    return redirect(url_for('admin'))
+    return redirect(url_for('dashboard'))
 
-@app.route('/admin/delete-message/<int:message_id>')
-def delete_message(message_id):
+@app.route('/dashboard/delete-message/<int:message_id>')
+def dashboard_delete_message(message_id):
     message = ContactMessage.query.get_or_404(message_id)
     db.session.delete(message)
     db.session.commit()
     flash('Message deleted.', 'success')
-    return redirect(url_for('admin'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/plants')
 def plants():
