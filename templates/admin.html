@@ -5,7 +5,7 @@
 {% block content %}
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-primary mb-4">🌿 Admin Dashboard</h1>
+            <h1 class="font-display text-4xl md:text-5xl font-bold gradient-text mb-4">🌿 Admin Dashboard</h1>
             <p class="text-lg text-base-content opacity-80">Manage your garden center</p>
         </div>
 
@@ -21,7 +21,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Contact Messages Section -->
-            <div class="card bg-base-200 shadow-sm">
+            <div class="card garden-glass hover-lift">
                 <div class="card-body">
                     <h2 class="card-title text-primary mb-4">📧 Contact Messages</h2>
                     <p class="text-sm text-base-content opacity-80 mb-4">
@@ -31,7 +31,7 @@
                     {% if messages %}
                         <div class="space-y-4">
                             {% for message in messages %}
-                                <div class="bg-base-300 rounded-lg p-4 {{ 'opacity-60' if message.is_read else '' }}">
+                                <div class="garden-glass rounded-lg p-4 {{ 'opacity-60' if message.is_read else '' }}">
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <h3 class="font-semibold">{{ message.name }}</h3>
@@ -62,7 +62,7 @@
             </div>
 
             <!-- Plants Management Section -->
-            <div class="card bg-base-200 shadow-sm">
+            <div class="card garden-glass hover-lift">
                 <div class="card-body">
                     <h2 class="card-title text-primary mb-4">🌱 Plant Inventory</h2>
                     <p class="text-sm text-base-content opacity-80 mb-4">

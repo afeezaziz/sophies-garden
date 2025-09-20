@@ -7,10 +7,10 @@
         <div class="hero hero-garden rounded-2xl shadow-sm">
             <div class="hero-content text-center py-16">
                 <div class="max-w-3xl mx-auto px-4">
-                    <h1 class="font-display text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                    <h1 class="font-display text-5xl md:text-6xl font-bold gradient-text mb-4">
                         🌸 Welcome to Sophie's Garden
                     </h1>
-                    <p class="text-lg md:text-xl text-base-content/80 mb-8">
+                    <p class="text-lg md:text-xl text-base-content opacity-80 mb-8">
                         A sanctuary where nature meets tranquility. Discover stunning flowers, thriving plants,
                         and inspired gardening to create your personal paradise.
                     </p>
@@ -25,7 +25,7 @@
         <!-- Featured Plants -->
         {% if plants %}
             <div class="mt-4">
-                <h2 class="font-display text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-6">🌱 Featured Plants</h2>
+                <h2 class="font-display text-3xl md:text-4xl font-bold gradient-text mb-6">🌱 Featured Plants</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for plant in plants %}
                         <div class="card garden-glass hover-lift transition-all">
