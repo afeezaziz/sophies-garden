@@ -3,6 +3,8 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import pymysql
+from sqlalchemy import or_, func
+from urllib.parse import quote_plus
 
 load_dotenv()
 
@@ -37,6 +39,29 @@ class Plant(db.Model):
     image_url = db.Column(db.String(300))
     in_stock = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
+
+class BlogPost(db.Model):
+    __tablename__ = 'blog_posts'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(220), unique=True)
+    excerpt = db.Column(db.Text)
+    content = db.Column(db.Text)
+    author = db.Column(db.String(120))
+    cover_image_url = db.Column(db.String(300))
+    tags = db.Column(db.String(300))  # comma-separated
+    is_published = db.Column(db.Boolean, default=True)
+    published_at = db.Column(db.DateTime, default=db.func.now(), index=True)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+# Ensure tables exist (safe no-ops for existing tables)
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        # Avoid crashing the app if DB user has no DDL privileges
+        print(f"Warning: could not create tables automatically: {e}")
 
 @app.route('/')
 def index():
@@ -95,11 +120,17 @@ def delete_message(message_id):
 
 @app.route('/plants')
 def plants():
-    category = request.args.get('category', 'all')
-    if category == 'all':
-        plants = Plant.query.filter_by(in_stock=True).all()
-    else:
-        plants = Plant.query.filter_by(category=category, in_stock=True).all()
+    category = (request.args.get('category', 'all') or 'all').lower()
+    query = Plant.query.filter_by(in_stock=True)
+    if category != 'all':
+        alias_map = {
+            'flower': ['flower', 'flowers'],
+            'fruit': ['fruit', 'fruits'],
+            'vegetable': ['vegetable', 'vegetables', 'veggies'],
+        }
+        aliases = alias_map.get(category, [category])
+        query = query.filter(func.lower(Plant.category).in_(aliases))
+    plants = query.all()
 
     categories = db.session.query(Plant.category).distinct().all()
     categories = [cat[0] for cat in categories]
@@ -121,7 +152,68 @@ def gallery():
 
 @app.route('/blog')
 def blog():
-    return render_template('blog.html')
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    q = (request.args.get('q') or '').strip()
+    tag = (request.args.get('tag') or '').strip()
+
+    query = BlogPost.query.filter_by(is_published=True)
+    if q:
+        like = f"%{q}%"
+        query = query.filter(or_(BlogPost.title.ilike(like),
+                                 BlogPost.excerpt.ilike(like),
+                                 BlogPost.content.ilike(like)))
+    if tag:
+        query = query.filter(BlogPost.tags.ilike(f"%{tag}%"))
+
+    pagination = (query
+                  .order_by(BlogPost.published_at.desc())
+                  .paginate(page=page, per_page=per_page, error_out=False))
+    posts = pagination.items
+
+    # Build a simple tag cloud list (top 12 by frequency)
+    all_tags = {}
+    for p in BlogPost.query.filter_by(is_published=True).all():
+        for t in (p.tags or '').split(','):
+            t = t.strip()
+            if not t:
+                continue
+            all_tags[t] = all_tags.get(t, 0) + 1
+    tags = [t for t, _ in sorted(all_tags.items(), key=lambda kv: kv[1], reverse=True)[:12]]
+
+    return render_template('blog.html', posts=posts, pagination=pagination, q=q, tag=tag, tags=tags)
+
+@app.route('/blog/<int:post_id>')
+def blog_detail(post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    # Read time estimate
+    words = len((post.content or '').split())
+    read_minutes = max(1, int(round(words / 200.0)))
+    # Related posts by tags
+    related = []
+    tags = [t.strip() for t in (post.tags or '').split(',') if t.strip()]
+    if tags:
+        tag_filters = [BlogPost.tags.like(f"%{t}%") for t in tags]
+        related = (BlogPost.query
+                   .filter(BlogPost.id != post.id, BlogPost.is_published == True)
+                   .filter(or_(*tag_filters))
+                   .order_by(BlogPost.published_at.desc())
+                   .limit(3)
+                   .all())
+    # Prev/Next by publish date
+    prev_post = (BlogPost.query
+                 .filter(BlogPost.is_published == True, BlogPost.published_at < post.published_at)
+                 .order_by(BlogPost.published_at.desc())
+                 .first())
+    next_post = (BlogPost.query
+                 .filter(BlogPost.is_published == True, BlogPost.published_at > post.published_at)
+                 .order_by(BlogPost.published_at.asc())
+                 .first())
+    # Share URLs
+    current_url = request.url
+    share_twitter = f"https://twitter.com/intent/tweet?text={quote_plus(post.title or '')}&url={quote_plus(current_url)}"
+    share_facebook = f"https://www.facebook.com/sharer/sharer.php?u={quote_plus(current_url)}"
+    return render_template('blog_detail.html', post=post, read_minutes=read_minutes, related=related, prev_post=prev_post, next_post=next_post, share_twitter=share_twitter, share_facebook=share_facebook)
 
 if __name__ == '__main__':
     app.run(debug=True)

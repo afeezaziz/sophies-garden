@@ -117,6 +117,69 @@ body {
   border-top: 1px solid rgba(255,255,255,0.3);
 }
 
+/* Blog post hero with gradient overlay */
+.post-hero {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  min-height: 260px;
+}
+.post-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.35)),
+    radial-gradient(600px 300px at 0% 0%, rgba(16,185,129,0.25), transparent 60%),
+    radial-gradient(600px 300px at 100% 0%, rgba(244,114,182,0.25), transparent 60%);
+}
+
+/* Article typography */
+.article {
+  color: hsl(var(--bc));
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+.article h1, .article h2, .article h3, .article h4 {
+  font-family: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+  line-height: 1.25;
+  margin: 1.25em 0 0.6em;
+  scroll-margin-top: 90px;
+}
+.article h1 { font-size: 2rem; }
+.article h2 { font-size: 1.6rem; }
+.article h3 { font-size: 1.25rem; }
+.article p { margin: 0.9em 0; }
+.article a { color: hsl(var(--p)); text-decoration: underline; }
+.article a:hover { opacity: 0.9; }
+.article img { border-radius: 0.75rem; margin: 1rem auto; display: block; max-width: 100%; height: auto; }
+.article blockquote {
+  border-left: 4px solid hsl(var(--p));
+  padding: 0.5rem 1rem;
+  background: hsla(var(--b1)/0.7);
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.article pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow: auto;
+}
+.article code {
+  background: hsla(var(--b3)/0.8);
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.35rem;
+}
+.article pre code { background: transparent; padding: 0; }
+.article ul, .article ol { padding-left: 1.25rem; margin: 0.75rem 0; }
+.article li { margin: 0.35rem 0; }
+.article hr { border: none; height: 1px; background: rgba(0,0,0,0.08); margin: 1.5rem 0; }
+.article table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.95rem; display: block; overflow-x: auto; white-space: nowrap; }
+.article th, .article td { border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem 0.75rem; }
+.article thead th { background: hsla(var(--b2)/0.8); }
+
 /* Scrollbar */
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-thumb {

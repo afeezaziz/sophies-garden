@@ -9,150 +9,91 @@
             <p class="text-lg text-base-content opacity-80 max-w-2xl mx-auto">
                 Tips, tricks, and inspiration for creating and maintaining your perfect garden.
             </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">🌱</span>
-                        <span class="text-xs text-base-content opacity-60">March 15, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Spring Garden Preparation Guide</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Everything you need to know to prepare your garden for the spring growing season.
-                        From soil testing to pruning tips, get your garden ready for a spectacular bloom.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Spring</span>
-                        <span class="badge badge-outline">Preparation</span>
-                        <span class="badge badge-outline">Tips</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
+            <!-- Search and Tag Filters -->
+            <div class="mt-6 flex flex-col items-center gap-4">
+                <form method="GET" action="{{ url_for('blog') }}" class="join">
+                    <input type="text" name="q" value="{{ q or '' }}" placeholder="Search posts..." class="input input-bordered join-item w-72" />
+                    {% if tag %}
+                        <input type="hidden" name="tag" value="{{ tag }}" />
+                    {% endif %}
+                    <button class="btn btn-primary join-item">Search</button>
+                    {% if q or tag %}
+                        <a href="{{ url_for('blog') }}" class="btn join-item">Clear</a>
+                    {% endif %}
+                </form>
+                {% if tags %}
+                <div class="flex flex-wrap justify-center gap-2">
+                    {% for t in tags %}
+                        <a href="{{ url_for('blog', tag=t, q=q) }}" class="btn btn-sm rounded-full {{ 'btn-primary' if t == tag else 'btn-outline btn-primary' }}">#{{ t }}</a>
+                    {% endfor %}
                 </div>
-            </article>
-
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">🌹</span>
-                        <span class="text-xs text-base-content opacity-60">March 10, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Rose Care: From Planting to Blooming</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Master the art of rose gardening with our comprehensive guide. Learn about different
-                        rose varieties, proper planting techniques, and ongoing care for beautiful blooms.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Roses</span>
-                        <span class="badge badge-outline">Care Guide</span>
-                        <span class="badge badge-outline">Flowers</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">🦋</span>
-                        <span class="text-xs text-base-content opacity-60">March 5, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Creating a Butterfly-Friendly Garden</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Transform your garden into a butterfly haven with these expert tips. Discover the best
-                        plants to attract butterflies and create a thriving ecosystem in your backyard.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Wildlife</span>
-                        <span class="badge badge-outline">Eco-Gardening</span>
-                        <span class="badge badge-outline">Butterflies</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">💧</span>
-                        <span class="text-xs text-base-content opacity-60">February 28, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Water Conservation in the Garden</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Learn sustainable watering practices that keep your garden healthy while conserving water.
-                        From drip irrigation to drought-tolerant plants, save resources beautifully.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Sustainable</span>
-                        <span class="badge badge-outline">Water</span>
-                        <span class="badge badge-outline">Conservation</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">🌿</span>
-                        <span class="text-xs text-base-content opacity-60">February 20, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Organic Pest Control Methods</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Keep your garden pest-free naturally with these organic solutions. From companion planting
-                        to natural predators, protect your plants without harmful chemicals.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Organic</span>
-                        <span class="badge badge-outline">Pest Control</span>
-                        <span class="badge badge-outline">Natural</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card garden-glass hover-lift">
-                <div class="card-body">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">🌺</span>
-                        <span class="text-xs text-base-content opacity-60">February 15, 2024</span>
-                    </div>
-                    <h2 class="card-title text-primary mb-2">Shade Garden Design Ideas</h2>
-                    <p class="text-base-content opacity-80 text-sm mb-4">
-                        Don't let shady areas go to waste! Discover beautiful plants and design ideas that thrive
-                        in low-light conditions and create stunning shade gardens.
-                    </p>
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        <span class="badge badge-outline">Shade</span>
-                        <span class="badge badge-outline">Design</span>
-                        <span class="badge badge-outline">Low Light</span>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm">Read More</button>
-                    </div>
-                </div>
-            </article>
-        </div>
-
-        <div class="text-center mt-8">
-            <div class="join">
-                <button class="btn btn-primary join-item">1</button>
-                <button class="btn btn-outline btn-primary join-item">2</button>
-                <button class="btn btn-outline btn-primary join-item">3</button>
-                <button class="btn btn-outline btn-primary join-item">Next</button>
+                {% endif %}
             </div>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if posts %}
+                {% for post in posts %}
+                    <article class="card garden-glass hover-lift">
+                        <figure class="h-48 w-full overflow-hidden rounded-t-xl">
+                            {% if post.cover_image_url %}
+                                <img src="{{ post.cover_image_url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                            {% else %}
+                                <div class="h-48 w-full bg-gradient-to-br from-pink-200 to-purple-300 flex items-center justify-center text-5xl">🪴</div>
+                            {% endif %}
+                        </figure>
+                        <div class="card-body">
+                            <div class="flex items-center gap-2 text-xs opacity-70">
+                                {% if post.author %}<span>By {{ post.author }}</span>{% endif %}
+                                <span>•</span>
+                                <span>{{ post.published_at.strftime('%b %d, %Y') if post.published_at else '' }}</span>
+                            </div>
+                            <h2 class="card-title text-primary">{{ post.title }}</h2>
+                            {% if post.excerpt %}
+                                <p class="text-base-content opacity-80 text-sm mb-3 line-clamp-2">{{ post.excerpt }}</p>
+                            {% else %}
+                                <p class="text-base-content opacity-80 text-sm mb-3 line-clamp-2">{{ (post.content or '')[:160] }}{% if post.content and post.content|length > 160 %}...{% endif %}</p>
+                            {% endif %}
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                {% for tag in (post.tags or '').split(',') if tag.strip() %}
+                                    <span class="badge badge-outline">{{ tag.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="card-actions">
+                                <a href="{{ url_for('blog_detail', post_id=post.id) }}" class="btn btn-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full text-center py-12 opacity-70">
+                    No posts yet. Check back soon!
+                </div>
+            {% endif %}
+        </div>
+
+        {% if pagination %}
+        <div class="text-center mt-8">
+            <div class="join">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('blog', page=pagination.prev_num) }}" class="btn btn-outline btn-primary join-item">Prev</a>
+                {% else %}
+                    <button class="btn join-item" disabled>Prev</button>
+                {% endif %}
+                {% for p in range(1, pagination.pages + 1) %}
+                    {% if p == pagination.page %}
+                        <a href="{{ url_for('blog', page=p) }}" class="btn btn-primary join-item">{{ p }}</a>
+                    {% else %}
+                        <a href="{{ url_for('blog', page=p) }}" class="btn btn-outline btn-primary join-item">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('blog', page=pagination.next_num) }}" class="btn btn-outline btn-primary join-item">Next</a>
+                {% else %}
+                    <button class="btn join-item" disabled>Next</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <div class="text-center mt-8">
             <h2 class="font-display text-2xl md:text-3xl font-bold gradient-text mb-4">Subscribe to Our Garden Tips</h2>
