@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 import pymysql
 from sqlalchemy import or_, func
 from urllib.parse import quote_plus
-from datetime import datetime
+from datetime import datetime, timedelta
+import csv
+from io import StringIO
 
 load_dotenv()
 
@@ -361,6 +363,33 @@ def logbook():
 
     plants = query.order_by(GardenPlant.created_at.desc()).all()
 
+    # Compute watering schedule info per plant
+    due_map = {}
+    today = datetime.utcnow().date()
+    for p in plants:
+        cat = (p.category or 'other').lower()
+        water_interval = {
+            'flower': 3,
+            'fruit': 2,
+            'vegetable': 2,
+            'herb': 2,
+            'tree': 4,
+            'other': 3,
+        }.get(cat, 3)
+        # last watering
+        dates = [ce.date for ce in (p.care_events or []) if ce.date and (ce.type or '').lower() == 'watering']
+        last_water = max(dates) if dates else None
+        next_water = (last_water + timedelta(days=water_interval)) if last_water else (today if p.planting_date is None else p.planting_date + timedelta(days=water_interval))
+        water_due = next_water <= today if next_water else False
+        water_soon = (next_water - today).days == 1 if next_water else False
+        due_map[p.id] = {
+            'next_water': next_water,
+            'last_water': last_water,
+            'water_due': water_due,
+            'water_soon': water_soon,
+            'water_interval_days': water_interval,
+        }
+
     totals = {
         'plants': db.session.query(func.count(GardenPlant.id)).scalar() or 0,
         'observations': db.session.query(func.count(Observation.id)).scalar() or 0,
@@ -371,7 +400,7 @@ def logbook():
     categories = db.session.query(func.lower(GardenPlant.category)).distinct().all()
     categories = [c[0] for c in categories]
 
-    return render_template('logbook.html', plants=plants, q=q, category=category, status=status, totals=totals, categories=categories)
+    return render_template('logbook.html', plants=plants, q=q, category=category, status=status, totals=totals, categories=categories, due_map=due_map)
 
 
 @app.route('/logbook/new', methods=['GET', 'POST'])
@@ -450,7 +479,129 @@ def logbook_detail(plant_id):
         })
     timeline.sort(key=lambda x: x['date'], reverse=True)
 
-    return render_template('logbook_detail.html', plant=plant, observations=observations, care=care, harvests=harvests, timeline=timeline)
+    # Insights & schedules
+    cat = (plant.category or 'other').lower()
+    WATER_INTERVAL = {
+        'flower': 3,
+        'fruit': 2,
+        'vegetable': 2,
+        'herb': 2,
+        'tree': 4,
+        'other': 3,
+    }.get(cat, 3)
+    FERT_INTERVAL = {
+        'flower': 14,
+        'fruit': 14,
+        'vegetable': 14,
+        'herb': 21,
+        'tree': 30,
+        'other': 14,
+    }.get(cat, 14)
+
+    def _latest_date(events, predicate=lambda e: True):
+        dts = [e.date for e in events if e.date and predicate(e)]
+        return max(dts) if dts else None
+
+    last_water = _latest_date(care, lambda e: (e.type or '').lower() == 'watering')
+    last_fert = _latest_date(care, lambda e: (e.type or '').lower() == 'fertilizing')
+    next_water = (last_water + timedelta(days=WATER_INTERVAL)) if last_water else (datetime.utcnow().date() if plant.planting_date is None else plant.planting_date + timedelta(days=WATER_INTERVAL))
+    next_fert = (last_fert + timedelta(days=FERT_INTERVAL)) if last_fert else (datetime.utcnow().date() if plant.planting_date is None else plant.planting_date + timedelta(days=FERT_INTERVAL))
+
+    first_flower = None
+    first_fruit = None
+    if observations:
+        for o in sorted(observations, key=lambda x: (x.date or datetime.utcnow().date())):
+            if first_flower is None and o.flowers and o.flowers > 0:
+                first_flower = o.date
+            if first_fruit is None and o.fruits and o.fruits > 0:
+                first_fruit = o.date
+            if first_flower and first_fruit:
+                break
+
+    first_harvest = _latest_date(harvests, lambda h: True)
+    if harvests:
+        first_harvest = min([h.date for h in harvests if h.date]) if any(h.date for h in harvests) else None
+
+    days_since_planting = (datetime.utcnow().date() - plant.planting_date).days if plant.planting_date else None
+    days_since_water = (datetime.utcnow().date() - last_water).days if last_water else None
+    days_since_fert = (datetime.utcnow().date() - last_fert).days if last_fert else None
+
+    # Growth series for chart
+    series = []
+    for o in sorted(observations, key=lambda x: (x.date or datetime.utcnow().date())):
+        if o.height_cm is not None and o.date is not None:
+            series.append({'d': o.date.isoformat(), 'h': o.height_cm})
+
+    # Harvest totals per unit
+    harvest_totals = {}
+    for h in harvests:
+        if h.quantity is not None and h.unit:
+            harvest_totals[h.unit] = harvest_totals.get(h.unit, 0.0) + float(h.quantity)
+
+    # Companion planting suggestions (simple mapping)
+    companions = {
+        'tomato': {
+            'good': ['Basil', 'Marigold', 'Chives', 'Carrot'],
+            'avoid': ['Fennel', 'Cabbage'],
+        },
+        'cucumber': {
+            'good': ['Dill', 'Nasturtium', 'Radish'],
+            'avoid': ['Potato', 'Sage'],
+        },
+        'pepper': {
+            'good': ['Basil', 'Onion', 'Spinach'],
+            'avoid': ['Fennel'],
+        },
+    }
+    pn = (plant.plant_name or '').strip().lower()
+    comp = companions.get(pn, None)
+
+    # Suggested actions
+    suggestions = []
+    if days_since_water is None or days_since_water >= WATER_INTERVAL:
+        suggestions.append({'kind': 'water', 'title': 'Water today', 'severity': 'high'})
+    elif days_since_water is not None and days_since_water >= max(0, WATER_INTERVAL - 1):
+        suggestions.append({'kind': 'water', 'title': 'Water soon', 'severity': 'medium'})
+
+    if days_since_fert is None or days_since_fert >= FERT_INTERVAL:
+        suggestions.append({'kind': 'fertilize', 'title': 'Fertilize this week', 'severity': 'medium'})
+
+    recent_pest = None
+    for o in observations:
+        if o.date and (datetime.utcnow().date() - o.date).days <= 7 and (o.pests or o.diseases):
+            recent_pest = True
+            break
+    if recent_pest:
+        recent_treat = _latest_date(care, lambda e: (e.type or '').lower() in ['spray', 'treatment'])
+        if not recent_treat or (datetime.utcnow().date() - recent_treat).days > 7:
+            suggestions.append({'kind': 'pest', 'title': 'Inspect for pests/disease', 'severity': 'high'})
+
+    insights = {
+        'first_flower': first_flower,
+        'first_fruit': first_fruit,
+        'first_harvest': first_harvest,
+        'days_since_planting': days_since_planting,
+        'last_water': last_water,
+        'next_water': next_water,
+        'last_fert': last_fert,
+        'next_fert': next_fert,
+        'water_interval_days': WATER_INTERVAL,
+        'fert_interval_days': FERT_INTERVAL,
+    }
+
+    return render_template(
+        'logbook_detail.html',
+        plant=plant,
+        observations=observations,
+        care=care,
+        harvests=harvests,
+        timeline=timeline,
+        series=series,
+        harvest_totals=harvest_totals,
+        suggestions=suggestions,
+        companions=comp,
+        insights=insights,
+    )
 
 
 @app.route('/logbook/<int:plant_id>/add-observation', methods=['POST'])
@@ -560,6 +711,93 @@ def add_harvest(plant_id):
     db.session.commit()
     flash('Harvest recorded.', 'success')
     return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+
+@app.route('/logbook/<int:plant_id>/quick/water', methods=['POST'])
+def quick_water(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    amount = (request.form.get('amount') or '').strip() or '500ml'
+    ce = CareEvent(plant_id=plant.id, date=datetime.utcnow().date(), type='watering', amount=amount, notes='Quick action')
+    db.session.add(ce)
+    db.session.commit()
+    flash('Watered successfully.', 'success')
+    return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+
+@app.route('/logbook/<int:plant_id>/quick/fertilize', methods=['POST'])
+def quick_fertilize(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    amount = (request.form.get('amount') or '').strip() or 'NPK 10-10-10 5g'
+    ce = CareEvent(plant_id=plant.id, date=datetime.utcnow().date(), type='fertilizing', amount=amount, notes='Quick action')
+    db.session.add(ce)
+    db.session.commit()
+    flash('Fertilizing logged.', 'success')
+    return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+
+@app.route('/logbook/quick/water', methods=['POST'])
+def quick_water_bulk():
+    ids_str = (request.form.get('plant_ids') or '').strip()
+    amount = (request.form.get('amount') or '').strip() or '500ml'
+    if not ids_str:
+        flash('No plants selected for watering.', 'error')
+        return redirect(url_for('logbook'))
+    ids = []
+    for tok in ids_str.split(','):
+        tok = tok.strip()
+        if tok.isdigit():
+            ids.append(int(tok))
+    plants = GardenPlant.query.filter(GardenPlant.id.in_(ids)).all()
+    for p in plants:
+        db.session.add(CareEvent(plant_id=p.id, date=datetime.utcnow().date(), type='watering', amount=amount, notes='Bulk quick action'))
+    db.session.commit()
+    flash(f'Watered {len(plants)} plant(s).', 'success')
+    return redirect(url_for('logbook'))
+
+
+@app.route('/logbook/quick/fertilize', methods=['POST'])
+def quick_fertilize_bulk():
+    ids_str = (request.form.get('plant_ids') or '').strip()
+    amount = (request.form.get('amount') or '').strip() or 'NPK 10-10-10 5g'
+    if not ids_str:
+        flash('No plants selected for fertilizing.', 'error')
+        return redirect(url_for('logbook'))
+    ids = []
+    for tok in ids_str.split(','):
+        tok = tok.strip()
+        if tok.isdigit():
+            ids.append(int(tok))
+    plants = GardenPlant.query.filter(GardenPlant.id.in_(ids)).all()
+    for p in plants:
+        db.session.add(CareEvent(plant_id=p.id, date=datetime.utcnow().date(), type='fertilizing', amount=amount, notes='Bulk quick action'))
+    db.session.commit()
+    flash(f'Fertilized {len(plants)} plant(s).', 'success')
+    return redirect(url_for('logbook'))
+
+
+@app.route('/logbook/<int:plant_id>/export.csv')
+def export_log_csv(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    observations = Observation.query.filter_by(plant_id=plant.id).all()
+    care = CareEvent.query.filter_by(plant_id=plant.id).all()
+    harvests = Harvest.query.filter_by(plant_id=plant.id).all()
+
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['type', 'date', 'notes', 'height_cm', 'leaves', 'flowers', 'fruits', 'pests', 'diseases', 'care_type', 'care_amount', 'harvest_quantity', 'harvest_unit', 'harvest_quality'])
+    for o in observations:
+        writer.writerow(['observation', o.date, (o.notes or ''), o.height_cm, o.leaves, o.flowers, o.fruits, (o.pests or ''), (o.diseases or ''), '', '', '', '', ''])
+    for ce in care:
+        writer.writerow(['care', ce.date, (ce.notes or ''), '', '', '', '', '', '', (ce.type or ''), (ce.amount or ''), '', '', ''])
+    for h in harvests:
+        writer.writerow(['harvest', h.date, (h.notes or ''), '', '', '', '', '', '', '', '', h.quantity, (h.unit or ''), (h.quality or '')])
+
+    csv_data = output.getvalue()
+    return app.response_class(
+        csv_data,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=plant_{plant.id}_log.csv'}
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

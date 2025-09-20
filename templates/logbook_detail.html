@@ -63,6 +63,131 @@
     </div>
   </div>
 
+  <!-- Insights & Quick Actions -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="card garden-glass">
+        <div class="card-body">
+          <h2 class="card-title text-primary">Care schedule & insights</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <div class="opacity-70">Last water</div>
+              <div class="font-medium">{{ insights.last_water.strftime('%b %d, %Y') if insights.last_water else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">Next water</div>
+              <div class="font-medium">{{ insights.next_water.strftime('%b %d, %Y') if insights.next_water else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">Interval</div>
+              <div class="font-medium">{{ insights.water_interval_days }} days</div>
+            </div>
+            <div>
+              <div class="opacity-70">Last fertilize</div>
+              <div class="font-medium">{{ insights.last_fert.strftime('%b %d, %Y') if insights.last_fert else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">Next fertilize</div>
+              <div class="font-medium">{{ insights.next_fert.strftime('%b %d, %Y') if insights.next_fert else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">Fert. interval</div>
+              <div class="font-medium">{{ insights.fert_interval_days }} days</div>
+            </div>
+            <div>
+              <div class="opacity-70">Days since planting</div>
+              <div class="font-medium">{{ insights.days_since_planting if insights.days_since_planting is not none else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">First flower</div>
+              <div class="font-medium">{{ insights.first_flower.strftime('%b %d, %Y') if insights.first_flower else '—' }}</div>
+            </div>
+            <div>
+              <div class="opacity-70">First fruit</div>
+              <div class="font-medium">{{ insights.first_fruit.strftime('%b %d, %Y') if insights.first_fruit else '—' }}</div>
+            </div>
+          </div>
+          {% if harvest_totals %}
+          <div class="divider"></div>
+          <div class="text-sm">
+            <div class="opacity-70 mb-1">Harvest totals</div>
+            <div class="flex flex-wrap gap-2">
+              {% for unit, qty in harvest_totals.items() %}
+                <span class="badge badge-outline">{{ qty }} {{ unit }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Growth chart -->
+      <div class="card garden-glass">
+        <div class="card-body">
+          <h2 class="card-title text-primary">Growth</h2>
+          {% if series and series|length > 1 %}
+            <canvas id="growthChart" height="200"></canvas>
+          {% else %}
+            <div class="opacity-80 text-sm">Add height observations to see growth over time.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Suggestions -->
+      <div class="card garden-glass">
+        <div class="card-body">
+          <h3 class="card-title text-primary">Suggestions</h3>
+          {% if suggestions %}
+            <ul class="menu menu-sm">
+              {% for s in suggestions %}
+                <li><span class="{{ 'text-error' if s.severity=='high' else ('text-warning' if s.severity=='medium' else 'text-info') }}">• {{ s.title }}</span></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="opacity-70 text-sm">No suggestions right now.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card garden-glass">
+        <div class="card-body">
+          <h3 class="card-title text-primary">Quick actions</h3>
+          <form method="post" action="{{ url_for('quick_water', plant_id=plant.id) }}" class="flex gap-2 items-end">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Water amount</span></label>
+              <input name="amount" class="input input-bordered" placeholder="500ml">
+            </div>
+            <button class="btn btn-sm">Water now</button>
+          </form>
+          <form method="post" action="{{ url_for('quick_fertilize', plant_id=plant.id) }}" class="flex gap-2 items-end mt-3">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Fertilizer</span></label>
+              <input name="amount" class="input input-bordered" placeholder="NPK 10-10-10 5g">
+            </div>
+            <button class="btn btn-sm">Fertilize</button>
+          </form>
+          <div class="mt-4">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('export_log_csv', plant_id=plant.id) }}">Export CSV</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Companions -->
+      {% if companions %}
+      <div class="card garden-glass">
+        <div class="card-body">
+          <h3 class="card-title text-primary">Companion planting</h3>
+          <div class="text-sm"><span class="opacity-70">Good:</span> {{ companions.good | join(', ') }}</div>
+          <div class="text-sm"><span class="opacity-70">Avoid:</span> {{ companions.avoid | join(', ') }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
   <!-- Add entries -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Observation form -->
@@ -236,4 +361,42 @@
     </div>
   </section>
 </section>
+{% endblock %}
+
+{% block extra_head %}
+  {{ super() }}
+  <script id="growth-data" type="application/json">{{ (series or []) | tojson }}</script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const raw = (document.getElementById('growth-data')?.textContent || '[]');
+    let series = [];
+    try { series = JSON.parse(raw); } catch (e) { series = []; }
+    if(!series || series.length < 2) return;
+    const canvas = document.getElementById('growthChart');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = canvas.clientWidth;
+    const H = canvas.height = Number(canvas.getAttribute('height')) || canvas.clientHeight || 200;
+    const xs = series.map(p => new Date(p.d).getTime());
+    const ys = series.map(p => Number(p.h));
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const pad = 20;
+    function xMap(t){return pad + (W-2*pad) * ((t-minX)/((maxX-minX)||1));}
+    function yMap(v){return H-pad - (H-2*pad) * ((v-minY)/((maxY-minY)||1));}
+    ctx.clearRect(0,0,W,H);
+    // grid
+    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    for(let i=0;i<5;i++){ const y = pad+i*(H-2*pad)/4; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); }
+    ctx.setLineDash([]);
+    // line
+    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(xMap(xs[0]), yMap(ys[0]));
+    for(let i=1;i<xs.length;i++){ ctx.lineTo(xMap(xs[i]), yMap(ys[i])); }
+    ctx.stroke();
+    // points
+    ctx.fillStyle = '#16a34a';
+    for(let i=0;i<xs.length;i++){ ctx.beginPath(); ctx.arc(xMap(xs[i]), yMap(ys[i]), 2.5, 0, Math.PI*2); ctx.fill(); }
+  });
+  </script>
 {% endblock %}
