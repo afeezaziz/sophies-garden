@@ -8,3 +8,15 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Alembic migration files (should be version controlled)
+# Alembic configuration (should be version controlled)
+# Database files (should NOT be version controlled)
+*.db
+*.sqlite
+*.sqlite3
+
+# Alembic version directory contents (should be version controlled)
+# Alembic specific generated files (optional to exclude)
+alembic/versions/README
+migrations/alembic.ini

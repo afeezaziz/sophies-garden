@@ -5,15 +5,15 @@
 {% block content %}
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-primary mb-4">🌿 Our Plant Collection</h1>
-            <p class="text-lg text-base-content opacity-80">Discover our carefully curated selection of plants</p>
+            <h1 class="font-display text-4xl md:text-5xl font-bold gradient-text mb-4">🌿 Our Plant Collection</h1>
+            <p class="text-lg text-base-content/80">Discover our carefully curated selection of plants</p>
         </div>
 
         <!-- Category Filter -->
         <div class="flex flex-wrap justify-center gap-2 mb-8">
-            <a href="{{ url_for('plants') }}" class="btn {{ 'btn-primary' if current_category == 'all' else 'btn-outline btn-primary' }}">All Plants</a>
+            <a href="{{ url_for('plants') }}" class="btn rounded-full {{ 'btn-primary' if current_category == 'all' else 'btn-outline btn-primary' }}">All Plants</a>
             {% for category in categories %}
-                <a href="{{ url_for('plants', category=category) }}" class="btn {{ 'btn-primary' if current_category == category else 'btn-outline btn-primary' }}">{{ category }}</a>
+                <a href="{{ url_for('plants', category=category) }}" class="btn rounded-full {{ 'btn-primary' if current_category == category else 'btn-outline btn-primary' }}">{{ category }}</a>
             {% endfor %}
         </div>
 
@@ -21,12 +21,12 @@
         {% if plants %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {% for plant in plants %}
-                    <div class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="card garden-glass hover-lift transition-all">
                         <figure>
                             <img src="{{ plant.image_url }}" alt="{{ plant.name }}" class="w-full h-48 object-cover">
                         </figure>
                         <div class="card-body">
-                            <h3 class="card-title text-primary">{{ plant.name }}</h3>
+                            <h3 class="card-title text-primary font-semibold">{{ plant.name }}</h3>
                             {% if plant.scientific_name %}
                                 <p class="text-sm italic opacity-70">{{ plant.scientific_name }}</p>
                             {% endif %}

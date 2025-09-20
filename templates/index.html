@@ -3,18 +3,20 @@
 {% block title %}Home - Sophie's Garden{% endblock %}
 
 {% block content %}
-    <div class="text-center space-y-6">
-        <div class="hero">
-            <div class="hero-content text-center">
-                <div class="max-w-2xl">
-                    <h1 class="text-5xl font-bold text-primary mb-4">🌸 Welcome to Sophie's Garden</h1>
-                    <p class="text-lg text-base-content opacity-80 mb-8">
-                        A beautiful sanctuary where nature meets tranquility. Discover our collection of stunning flowers,
-                        plants, and gardening tips to create your own paradise.
+    <div class="text-center space-y-10">
+        <div class="hero hero-garden rounded-2xl shadow-sm">
+            <div class="hero-content text-center py-16">
+                <div class="max-w-3xl mx-auto px-4">
+                    <h1 class="font-display text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+                        🌸 Welcome to Sophie's Garden
+                    </h1>
+                    <p class="text-lg md:text-xl text-base-content/80 mb-8">
+                        A sanctuary where nature meets tranquility. Discover stunning flowers, thriving plants,
+                        and inspired gardening to create your personal paradise.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ url_for('about') }}" class="btn btn-primary">Learn More</a>
-                        <a href="{{ url_for('contact') }}" class="btn btn-outline btn-primary">Get in Touch</a>
+                        <a href="{{ url_for('about') }}" class="btn btn-primary btn-lg">Learn More</a>
+                        <a href="{{ url_for('contact') }}" class="btn btn-outline btn-primary btn-lg">Get in Touch</a>
                     </div>
                 </div>
             </div>
@@ -22,16 +24,16 @@
 
         <!-- Featured Plants -->
         {% if plants %}
-            <div class="mt-12">
-                <h2 class="text-3xl font-bold text-primary mb-6">🌱 Featured Plants</h2>
+            <div class="mt-4">
+                <h2 class="font-display text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-6">🌱 Featured Plants</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for plant in plants %}
-                        <div class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="card garden-glass hover-lift transition-all">
                             <figure>
                                 <img src="{{ plant.image_url }}" alt="{{ plant.name }}" class="w-full h-48 object-cover">
                             </figure>
                             <div class="card-body">
-                                <h3 class="card-title text-primary">{{ plant.name }}</h3>
+                                <h3 class="card-title text-primary font-semibold">{{ plant.name }}</h3>
                                 {% if plant.scientific_name %}
                                     <p class="text-sm italic opacity-70">{{ plant.scientific_name }}</p>
                                 {% endif %}

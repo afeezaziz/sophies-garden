@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="garden">
+<html lang="en" data-theme="sophie">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sophie's Garden{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sophie.css') }}">
 </head>
-<body class="min-h-screen flex flex-col bg-base-100">
-    <header class="navbar bg-base-200 shadow-sm px-4 py-2">
+<body class="min-h-screen flex flex-col bg-base-100 relative">
+    <header class="navbar sticky top-0 z-40 bg-base-100/70 border-b border-base-200/60 px-4 py-2">
         <div class="navbar-start">
-            <a href="{{ url_for('index') }}" class="btn btn-ghost text-xl font-bold text-primary">🌸 Sophie's Garden</a>
+            <a href="{{ url_for('index') }}" class="btn btn-ghost normal-case text-xl md:text-2xl font-bold font-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">🌸 Sophie's Garden</a>
         </div>
         <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1 space-x-1">
-                <li><a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm">Home</a></li>
-                <li><a href="{{ url_for('plants') }}" class="btn btn-ghost btn-sm">Plants</a></li>
-                <li><a href="{{ url_for('about') }}" class="btn btn-ghost btn-sm">About</a></li>
-                <li><a href="{{ url_for('services') }}" class="btn btn-ghost btn-sm">Services</a></li>
-                <li><a href="{{ url_for('gallery') }}" class="btn btn-ghost btn-sm">Gallery</a></li>
-                <li><a href="{{ url_for('blog') }}" class="btn btn-ghost btn-sm">Blog</a></li>
-                <li><a href="{{ url_for('contact') }}" class="btn btn-ghost btn-sm">Contact</a></li>
+            <ul class="menu menu-horizontal px-1 gap-1 items-center">
+                <li><a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm rounded-full">Home</a></li>
+                <li><a href="{{ url_for('plants') }}" class="btn btn-ghost btn-sm rounded-full">Plants</a></li>
+                <li><a href="{{ url_for('about') }}" class="btn btn-ghost btn-sm rounded-full">About</a></li>
+                <li><a href="{{ url_for('services') }}" class="btn btn-ghost btn-sm rounded-full">Services</a></li>
+                <li><a href="{{ url_for('gallery') }}" class="btn btn-ghost btn-sm rounded-full">Gallery</a></li>
+                <li><a href="{{ url_for('blog') }}" class="btn btn-ghost btn-sm rounded-full">Blog</a></li>
+                <li><a href="{{ url_for('contact') }}" class="btn btn-ghost btn-sm rounded-full">Contact</a></li>
             </ul>
         </div>
         <div class="navbar-end">
@@ -31,7 +34,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
                     </svg>
                 </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100/90 rounded-box w-56 border border-base-200/60 backdrop-blur">
                     <li><a href="{{ url_for('index') }}">Home</a></li>
                     <li><a href="{{ url_for('plants') }}">Plants</a></li>
                     <li><a href="{{ url_for('about') }}">About</a></li>
@@ -44,11 +47,11 @@
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 py-6">
+    <main class="flex-grow container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-base-200 py-3 px-4">
+    <footer class="footer-gradient py-6 px-4">
         <div class="container mx-auto text-center">
             <p class="text-sm text-base-content opacity-75">&copy; 2024 Sophie's Garden. All rights reserved.</p>
         </div>
