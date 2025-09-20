@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import pymysql
 from sqlalchemy import or_, func
 from urllib.parse import quote_plus
+from datetime import datetime
 
 load_dotenv()
 
@@ -59,6 +60,63 @@ class BlogPost(db.Model):
     published_at = db.Column(db.DateTime, default=db.func.now(), index=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+class GardenPlant(db.Model):
+    __tablename__ = 'garden_plants'
+    id = db.Column(db.Integer, primary_key=True)
+    nickname = db.Column(db.String(100))
+    plant_name = db.Column(db.String(100), nullable=False)  # e.g., Tomato
+    scientific_name = db.Column(db.String(200))
+    category = db.Column(db.String(50), nullable=False)  # flower, fruit, vegetable, herb, tree
+    variety = db.Column(db.String(100))
+    source = db.Column(db.String(50))  # seed, seedling, cutting
+    planting_date = db.Column(db.Date)
+    location = db.Column(db.String(120))  # e.g., Bed A, Pot 3
+    image_url = db.Column(db.String(300))
+    status = db.Column(db.String(30), default='active')  # active, harvested, removed
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    observations = db.relationship('Observation', backref='plant', cascade='all, delete-orphan')
+    care_events = db.relationship('CareEvent', backref='plant', cascade='all, delete-orphan')
+    harvests = db.relationship('Harvest', backref='plant', cascade='all, delete-orphan')
+
+class Observation(db.Model):
+    __tablename__ = 'observations'
+    id = db.Column(db.Integer, primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('garden_plants.id'), nullable=False)
+    date = db.Column(db.Date, default=db.func.current_date())
+    height_cm = db.Column(db.Float)
+    leaves = db.Column(db.Integer)
+    flowers = db.Column(db.Integer)
+    fruits = db.Column(db.Integer)
+    pests = db.Column(db.String(200))
+    diseases = db.Column(db.String(200))
+    photo_url = db.Column(db.String(300))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+class CareEvent(db.Model):
+    __tablename__ = 'care_events'
+    id = db.Column(db.Integer, primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('garden_plants.id'), nullable=False)
+    date = db.Column(db.Date, default=db.func.current_date())
+    type = db.Column(db.String(50))  # watering, fertilizing, pruning, weeding, transplanting, spray
+    amount = db.Column(db.String(100))  # e.g., 500ml or 10-10-10 5g
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+class Harvest(db.Model):
+    __tablename__ = 'harvests'
+    id = db.Column(db.Integer, primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('garden_plants.id'), nullable=False)
+    date = db.Column(db.Date, default=db.func.current_date())
+    quantity = db.Column(db.Float)
+    unit = db.Column(db.String(20))  # g, kg, count
+    quality = db.Column(db.String(50))
+    notes = db.Column(db.Text)
+    photo_url = db.Column(db.String(300))
+    created_at = db.Column(db.DateTime, default=db.func.now())
 
 # Ensure tables exist (safe no-ops for existing tables)
 with app.app_context():
@@ -278,6 +336,230 @@ def blog_detail(post_id):
     share_twitter = f"https://twitter.com/intent/tweet?text={quote_plus(post.title or '')}&url={quote_plus(current_url)}"
     share_facebook = f"https://www.facebook.com/sharer/sharer.php?u={quote_plus(current_url)}"
     return render_template('blog_detail.html', post=post, read_minutes=read_minutes, related=related, prev_post=prev_post, next_post=next_post, share_twitter=share_twitter, share_facebook=share_facebook)
+
+# ---- Garden Logbook ----
+
+@app.route('/logbook')
+def logbook():
+    q = (request.args.get('q') or '').strip()
+    category = (request.args.get('category') or 'all').lower()
+    status = (request.args.get('status') or 'active').lower()
+
+    query = GardenPlant.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter(or_(
+            GardenPlant.plant_name.ilike(like),
+            GardenPlant.nickname.ilike(like),
+            GardenPlant.variety.ilike(like),
+            GardenPlant.location.ilike(like),
+        ))
+    if category != 'all':
+        query = query.filter(func.lower(GardenPlant.category) == category)
+    if status != 'all':
+        query = query.filter(func.lower(GardenPlant.status) == status)
+
+    plants = query.order_by(GardenPlant.created_at.desc()).all()
+
+    totals = {
+        'plants': db.session.query(func.count(GardenPlant.id)).scalar() or 0,
+        'observations': db.session.query(func.count(Observation.id)).scalar() or 0,
+        'care': db.session.query(func.count(CareEvent.id)).scalar() or 0,
+        'harvests': db.session.query(func.count(Harvest.id)).scalar() or 0,
+    }
+
+    categories = db.session.query(func.lower(GardenPlant.category)).distinct().all()
+    categories = [c[0] for c in categories]
+
+    return render_template('logbook.html', plants=plants, q=q, category=category, status=status, totals=totals, categories=categories)
+
+
+@app.route('/logbook/new', methods=['GET', 'POST'])
+def logbook_new():
+    if request.method == 'POST':
+        plant_name = (request.form.get('plant_name') or '').strip()
+        category = (request.form.get('category') or '').strip().lower()
+        nickname = (request.form.get('nickname') or '').strip()
+        scientific_name = (request.form.get('scientific_name') or '').strip()
+        variety = (request.form.get('variety') or '').strip()
+        source = (request.form.get('source') or '').strip()
+        planting_date_str = (request.form.get('planting_date') or '').strip()
+        location = (request.form.get('location') or '').strip()
+        image_url = (request.form.get('image_url') or '').strip()
+        notes = (request.form.get('notes') or '').strip()
+
+        if not plant_name or not category:
+            flash('Please provide at least the plant name and category.', 'error')
+            return redirect(url_for('logbook_new'))
+
+        planting_date = None
+        if planting_date_str:
+            try:
+                planting_date = datetime.strptime(planting_date_str, '%Y-%m-%d').date()
+            except Exception:
+                flash('Invalid planting date format. Use YYYY-MM-DD.', 'error')
+                return redirect(url_for('logbook_new'))
+
+        gp = GardenPlant(
+            plant_name=plant_name,
+            category=category,
+            nickname=nickname or None,
+            scientific_name=scientific_name or None,
+            variety=variety or None,
+            source=source or None,
+            planting_date=planting_date,
+            location=location or None,
+            image_url=image_url or None,
+            notes=notes or None,
+        )
+        db.session.add(gp)
+        db.session.commit()
+        flash('Plant added to your logbook!', 'success')
+        return redirect(url_for('logbook_detail', plant_id=gp.id))
+
+    return render_template('logbook_new.html')
+
+
+@app.route('/logbook/<int:plant_id>')
+def logbook_detail(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+
+    observations = Observation.query.filter_by(plant_id=plant.id).order_by(Observation.date.desc(), Observation.created_at.desc()).all()
+    care = CareEvent.query.filter_by(plant_id=plant.id).order_by(CareEvent.date.desc(), CareEvent.created_at.desc()).all()
+    harvests = Harvest.query.filter_by(plant_id=plant.id).order_by(Harvest.date.desc(), Harvest.created_at.desc()).all()
+
+    # Build unified timeline sorted by date (desc)
+    timeline = []
+    for o in observations:
+        timeline.append({
+            'kind': 'obs',
+            'date': o.date or (o.created_at.date() if o.created_at else datetime.utcnow().date()),
+            'obj': o,
+        })
+    for c in care:
+        timeline.append({
+            'kind': 'care',
+            'date': c.date or (c.created_at.date() if c.created_at else datetime.utcnow().date()),
+            'obj': c,
+        })
+    for h in harvests:
+        timeline.append({
+            'kind': 'harvest',
+            'date': h.date or (h.created_at.date() if h.created_at else datetime.utcnow().date()),
+            'obj': h,
+        })
+    timeline.sort(key=lambda x: x['date'], reverse=True)
+
+    return render_template('logbook_detail.html', plant=plant, observations=observations, care=care, harvests=harvests, timeline=timeline)
+
+
+@app.route('/logbook/<int:plant_id>/add-observation', methods=['POST'])
+def add_observation(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    date_str = (request.form.get('date') or '').strip()
+    height_cm = request.form.get('height_cm')
+    leaves = request.form.get('leaves')
+    flowers = request.form.get('flowers')
+    fruits = request.form.get('fruits')
+    pests = (request.form.get('pests') or '').strip() or None
+    diseases = (request.form.get('diseases') or '').strip() or None
+    photo_url = (request.form.get('photo_url') or '').strip() or None
+    notes = (request.form.get('notes') or '').strip() or None
+
+    date = None
+    if date_str:
+        try:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except Exception:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'error')
+            return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+    obs = Observation(
+        plant_id=plant.id,
+        date=date or datetime.utcnow().date(),
+        height_cm=float(height_cm) if height_cm else None,
+        leaves=int(leaves) if leaves else None,
+        flowers=int(flowers) if flowers else None,
+        fruits=int(fruits) if fruits else None,
+        pests=pests,
+        diseases=diseases,
+        photo_url=photo_url,
+        notes=notes,
+    )
+    db.session.add(obs)
+    db.session.commit()
+    flash('Observation added.', 'success')
+    return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+
+@app.route('/logbook/<int:plant_id>/add-care', methods=['POST'])
+def add_care(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    date_str = (request.form.get('date') or '').strip()
+    type_ = (request.form.get('type') or '').strip()
+    amount = (request.form.get('amount') or '').strip() or None
+    notes = (request.form.get('notes') or '').strip() or None
+
+    if not type_:
+        flash('Please choose a care type.', 'error')
+        return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+    date = None
+    if date_str:
+        try:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except Exception:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'error')
+            return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+    ce = CareEvent(
+        plant_id=plant.id,
+        date=date or datetime.utcnow().date(),
+        type=type_,
+        amount=amount,
+        notes=notes,
+    )
+    db.session.add(ce)
+    db.session.commit()
+    flash('Care event logged.', 'success')
+    return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+
+@app.route('/logbook/<int:plant_id>/add-harvest', methods=['POST'])
+def add_harvest(plant_id):
+    plant = GardenPlant.query.get_or_404(plant_id)
+    date_str = (request.form.get('date') or '').strip()
+    quantity = request.form.get('quantity')
+    unit = (request.form.get('unit') or '').strip()
+    quality = (request.form.get('quality') or '').strip() or None
+    notes = (request.form.get('notes') or '').strip() or None
+    photo_url = (request.form.get('photo_url') or '').strip() or None
+
+    if not quantity or not unit:
+        flash('Please provide harvest quantity and unit.', 'error')
+        return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+    date = None
+    if date_str:
+        try:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except Exception:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'error')
+            return redirect(url_for('logbook_detail', plant_id=plant.id))
+
+    hv = Harvest(
+        plant_id=plant.id,
+        date=date or datetime.utcnow().date(),
+        quantity=float(quantity),
+        unit=unit,
+        quality=quality,
+        notes=notes,
+        photo_url=photo_url,
+    )
+    db.session.add(hv)
+    db.session.commit()
+    flash('Harvest recorded.', 'success')
+    return redirect(url_for('logbook_detail', plant_id=plant.id))
 
 if __name__ == '__main__':
     app.run(debug=True)

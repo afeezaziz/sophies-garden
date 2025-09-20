@@ -10,6 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import db
 from app import ContactMessage, Plant
+from app import BlogPost, GardenPlant, Observation, CareEvent, Harvest
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

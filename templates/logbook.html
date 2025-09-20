@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Logbook - Sophie's Garden{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <h1 class="font-display text-3xl md:text-4xl font-bold gradient-text">Garden Logbook</h1>
+    <div class="flex gap-2">
+      <a href="{{ url_for('logbook_new') }}" class="btn btn-primary">➕ Add Plant</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="card garden-glass"><div class="card-body"><div class="text-sm opacity-70">Plants</div><div class="text-2xl font-bold">{{ totals.plants }}</div></div></div>
+    <div class="card garden-glass"><div class="card-body"><div class="text-sm opacity-70">Observations</div><div class="text-2xl font-bold">{{ totals.observations }}</div></div></div>
+    <div class="card garden-glass"><div class="card-body"><div class="text-sm opacity-70">Care</div><div class="text-2xl font-bold">{{ totals.care }}</div></div></div>
+    <div class="card garden-glass"><div class="card-body"><div class="text-sm opacity-70">Harvests</div><div class="text-2xl font-bold">{{ totals.harvests }}</div></div></div>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" class="card garden-glass"><div class="card-body grid grid-cols-1 md:grid-cols-4 gap-3">
+    <div class="form-control">
+      <label class="label"><span class="label-text">Search</span></label>
+      <input type="text" name="q" value="{{ q }}" class="input input-bordered" placeholder="Name, location, variety...">
+    </div>
+    <div class="form-control">
+      <label class="label"><span class="label-text">Category</span></label>
+      <select name="category" class="select select-bordered">
+        <option value="all" {% if category=='all' %}selected{% endif %}>All</option>
+        {% for c in categories %}
+          <option value="{{ c }}" {% if category==c %}selected{% endif %}>{{ c|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-control">
+      <label class="label"><span class="label-text">Status</span></label>
+      <select name="status" class="select select-bordered">
+        <option value="active" {% if status=='active' %}selected{% endif %}>Active</option>
+        <option value="harvested" {% if status=='harvested' %}selected{% endif %}>Harvested</option>
+        <option value="removed" {% if status=='removed' %}selected{% endif %}>Removed</option>
+        <option value="all" {% if status=='all' %}selected{% endif %}>All</option>
+      </select>
+    </div>
+    <div class="form-control md:items-end">
+      <label class="label"><span class="label-text">&nbsp;</span></label>
+      <button class="btn">Filter</button>
+    </div>
+  </div></form>
+
+  <!-- Plants -->
+  {% if plants %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for p in plants %}
+      <article class="card garden-glass hover-lift">
+        <figure class="h-40 overflow-hidden">
+          {% if p.image_url %}
+            <img src="{{ p.image_url }}" alt="{{ p.plant_name }}" class="w-full h-40 object-cover">
+          {% else %}
+            <div class="h-40 w-full bg-gradient-to-br from-green-200 to-blue-300 flex items-center justify-center text-4xl">🌱</div>
+          {% endif %}
+        </figure>
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <h3 class="card-title text-primary">
+              {{ p.plant_name }}{% if p.variety %} — <span class="opacity-80 text-base font-normal">{{ p.variety }}</span>{% endif %}
+              {% if p.nickname %}<span class="badge badge-outline ml-2">{{ p.nickname }}</span>{% endif %}
+            </h3>
+            <span class="badge {% if p.status=='active' %}badge-success{% elif p.status=='harvested' %}badge-info{% else %}badge-ghost{% endif %}">{{ p.status|capitalize }}</span>
+          </div>
+          <div class="text-sm opacity-80">{{ p.category|capitalize }}{% if p.location %} • {{ p.location }}{% endif %}</div>
+          <div class="text-sm opacity-70">
+            {% if p.planting_date %}Planted {{ p.planting_date.strftime('%b %d, %Y') }}{% endif %}
+          </div>
+          <div class="mt-3 text-sm flex gap-3 opacity-80">
+            <div>👀 {{ p.observations|length }}</div>
+            <div>🛠️ {{ p.care_events|length }}</div>
+            <div>🧺 {{ p.harvests|length }}</div>
+          </div>
+          <div class="card-actions justify-end">
+            <a href="{{ url_for('logbook_detail', plant_id=p.id) }}" class="btn btn-sm btn-primary">Open</a>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="card garden-glass">
+      <div class="card-body">
+        <div class="text-lg">No plants yet</div>
+        <p class="opacity-80">Start your scientific log by adding your first plant.</p>
+        <div class="card-actions mt-2">
+          <a href="{{ url_for('logbook_new') }}" class="btn btn-primary">Add Plant</a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

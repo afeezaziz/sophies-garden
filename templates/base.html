@@ -23,6 +23,7 @@
                 <li><a href="{{ url_for('plants', category='fruit') }}" class="btn btn-ghost btn-sm rounded-full">Fruit</a></li>
                 <li><a href="{{ url_for('plants', category='vegetable') }}" class="btn btn-ghost btn-sm rounded-full">Vegetable</a></li>
                 <li><a href="{{ url_for('blog') }}" class="btn btn-ghost btn-sm rounded-full">Blog</a></li>
+                <li><a href="{{ url_for('logbook') }}" class="btn btn-ghost btn-sm rounded-full">Logbook</a></li>
             </ul>
         </div>
         <div class="navbar-end">
@@ -40,11 +41,31 @@
                     <li><a href="{{ url_for('plants', category='fruit') }}">Fruit</a></li>
                     <li><a href="{{ url_for('plants', category='vegetable') }}">Vegetable</a></li>
                     <li><a href="{{ url_for('blog') }}">Blog</a></li>
+                    <li><a href="{{ url_for('logbook') }}">Logbook</a></li>
                     <li class="mt-2"><a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a></li>
                 </ul>
             </div>
         </div>
     </header>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="space-y-2">
+            {% for category, message in messages %}
+                {% set cls = 'alert-info' %}
+                {% if category == 'success' %}{% set cls = 'alert-success' %}{% endif %}
+                {% if category == 'error' %}{% set cls = 'alert-error' %}{% endif %}
+                {% if category == 'warning' %}{% set cls = 'alert-warning' %}{% endif %}
+                <div class="alert {{ cls }} shadow">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
 
     <main class="flex-grow container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {% block content %}{% endblock %}
